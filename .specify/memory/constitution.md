@@ -1,55 +1,47 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- 
+SYNC IMPACT REPORT:
+Version change: 1.0.0 → 1.1.0
+Modified principles: None (new constitution)
+Added sections: All new principles for educational book platform
+Removed sections: Template placeholders only
+Templates requiring updates: 
+  - ✅ plan-template.md (no changes needed)
+  - ✅ spec-template.md (no changes needed)
+  - ✅ tasks-template.md (no changes needed)
+  - ⚠ .qwen/commands/*.toml (needs general review)
+  - ⚠ README.md (needs reference update if exists)
+Follow-up TODOs: None
+-->
+
+# Educational Book Platform Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### Code Quality
+All implementations must be type-safe with proper error handling. Code must include comprehensive testing for critical paths, clear documentation and comments, and modular, reusable components.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### Testing Standards
+Unit tests are required for all business logic, integration tests for API endpoints, and end-to-end tests for critical user flows. Code must maintain minimum 80% code coverage.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### User Experience
+Design must be responsive with mobile-first approach, comply with WCAG 2.1 AA accessibility standards, include appropriate loading states and error messages, and feature smooth animations and transitions.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### Performance Requirements
+Pages must load in under 3 seconds, API responses must be under 500ms, vector search must be efficient, and images must be delivered optimally.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### Architecture Principles
+API design must be stateless with proper separation of concerns and implementation of security best practices.
 
-### [PRINCIPLE_6_NAME]
+### Content Integrity
+Educational content must be accurate, properly sourced, version-controlled, and accessible across all supported platforms.
 
+## Additional Constraints
+All technology choices must support the educational mission, comply with educational privacy regulations (such as COPPA), and ensure long-term sustainability of the platform. Deployment must follow security-first practices with zero-downtime capabilities for educational continuity.
 
-[PRINCIPLE__DESCRIPTION]
-
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow
+All pull requests must undergo code review by at least two team members, include appropriate tests for new functionality, pass all automated checks and meet accessibility guidelines. Contributions must maintain high educational value and user experience standards.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This constitution represents the foundation for all development practices on the educational book platform. All changes to the codebase must align with these principles. Amendments to this constitution require team consensus and must be documented with clear rationale.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.1.0 | **Ratified**: 2025-01-15 | **Last Amended**: 2025-12-10

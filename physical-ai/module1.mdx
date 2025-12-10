@@ -1,0 +1,266 @@
+import Head from '@docusaurus/Head';
+
+<Head>
+  <title>The Robotic Nervous System (ROS 2)</title>
+  <meta name="description" content="Learn about ROS 2 - the middleware that connects all components of a humanoid robot." />
+</Head>
+
+# Module 1: The Robotic Nervous System (ROS 2)
+
+## Understanding the Robot's Neural Network
+
+Think of ROS 2 (Robot Operating System 2) as the nervous system of your robot. Just as your nervous system carries signals from your brain to your limbs and sensory information back to your brain, ROS 2 enables communication between all the components of your humanoid robot. When your robot's camera detects an object, ROS 2 carries that information to the decision-making system. When the AI decides to move the robot's arm, ROS 2 transmits those commands to the motor controllers. Without this communication infrastructure, your robot would be a collection of disconnected parts rather than a unified, intelligent system.
+
+ROS 2 isn't actually an operating system in the traditional sense—it's a middleware framework that provides the infrastructure for robotic applications. It handles the complex task of connecting different software components (nodes) so engineers can focus on developing the unique behaviors and capabilities of their robots.
+
+## Core Concepts: Nodes, Topics, and Services
+
+At the heart of ROS 2 are three fundamental concepts that enable distributed robotic systems:
+
+### Nodes
+A **node** is a process that performs computation. In a humanoid robot, you might have nodes for:
+- Camera processing
+- Motor control
+- Path planning
+- Voice recognition
+- Decision making
+
+Each node runs independently and communicates with other nodes through messages.
+
+### Topics and Publishers/Subscribers
+**Topics** enable asynchronous communication between nodes using a publish-subscribe pattern. Think of topics like radio stations—some nodes broadcast information (publishers), while others listen for specific types of information (subscribers).
+
+For example, a camera node might continuously publish images to the `/camera/image_raw` topic, while multiple other nodes (object detection, SLAM, etc.) subscribe to receive those images.
+
+```python
+# Publisher example
+import rclpy
+from sensor_msgs.msg import Image
+
+def camera_publisher():
+    # Initialize ROS 2 node
+    rclpy.init()
+    node = rclpy.create_node('camera_publisher')
+
+    # Create publisher
+    publisher = node.create_publisher(Image, '/camera/image_raw', 10)
+
+    # Publish image data (simplified)
+    image_msg = Image()  # Populate with actual image data
+    publisher.publish(image_msg)
+```
+
+### Services
+**Services** enable synchronous request-response communication. When a node needs immediate feedback, it sends a request to a service and waits for a response. Common services in humanoid robots include:
+- Requesting the robot to move to a specific position
+- Asking for current joint angles
+- Requesting map data from a mapping node
+
+## Understanding URDF: The Robot's Blueprint
+
+The Unified Robot Description Format (**URDF**) is the standard way to describe robot geometry, kinematics, and dynamics in ROS 2. Think of URDF as the robot's blueprint—it defines:
+- Physical dimensions of each link (body parts)
+- Joint connections between links
+- Mass properties and inertial characteristics
+- Visual and collision properties
+- Sensor mounting positions
+
+Here's a simplified URDF snippet for a humanoid leg:
+```xml
+<robot name="humanoid_robot">
+  <link name="hip">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <joint name="hip_to_thigh" type="revolute">
+    <parent link="hip"/>
+    <child link="thigh"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="100" velocity="1"/>
+  </joint>
+</robot>
+```
+
+## Bridging Python Agents to ROS Controllers
+
+One of the most powerful aspects of ROS 2 is its ability to integrate modern AI agents written in Python with low-level robot controllers. This connection allows sophisticated AI systems to control physical robots.
+
+For example, consider integrating an OpenAI-compatible agent that can understand natural language commands with ROS 2 motor controllers:
+
+```python
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from trajectory_msgs.msg import JointTrajectory
+import openai  # Simplified example
+
+class AIBridgeNode(Node):
+    def __init__(self):
+        super().__init__('ai_bridge_node')
+
+        # Publisher for joint commands
+        self.joint_pub = self.create_publisher(
+            JointTrajectory,
+            '/joint_trajectory_controller/joint_trajectory',
+            10
+        )
+
+        # Subscriber for voice commands
+        self.voice_sub = self.create_subscription(
+            String,
+            '/voice_commands',
+            self.voice_callback,
+            10
+        )
+
+    def voice_callback(self, msg):
+        # Process natural language command
+        ai_response = self.process_command_with_ai(msg.data)
+
+        # Convert AI response to robot actions
+        self.execute_robot_action(ai_response)
+
+    def process_command_with_ai(self, command):
+        # Use OpenAI-compatible API to interpret command
+        # Return structured action plan
+        pass
+
+    def execute_robot_action(self, action_plan):
+        # Convert action plan to ROS 2 messages
+        # Publish to appropriate topics
+        pass
+
+def main(args=None):
+    rclpy.init(args=args)
+    ai_bridge = AIBridgeNode()
+
+    try:
+        rclpy.spin(ai_bridge)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        ai_bridge.destroy_node()
+        rclpy.shutdown()
+```
+
+## The ROS 2 Ecosystem for Humanoids
+
+ROS 2 has a rich ecosystem of packages specifically designed for humanoid robotics:
+
+- **Navigation2 (Nav2)**: Provides path planning and navigation capabilities, essential for humanoid mobility
+- **MoveIt2**: Motion planning framework for manipulation tasks
+- **ros2_control**: Hardware abstraction layer for controlling robot joints
+- **rviz2**: Visualization tool for monitoring robot state and debugging
+
+## Practical Application: Building Your First Humanoid Node
+
+Let's walk through creating a simple node that controls a humanoid robot's walking gait:
+
+```python
+import rclpy
+from rclpy.node import Node
+from builtin_interfaces.msg import Duration
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Header
+
+class WalkingController(Node):
+    def __init__(self):
+        super().__init__('walking_controller')
+
+        # Publisher for joint trajectories
+        self.traj_pub = self.create_publisher(
+            JointTrajectory,
+            '/joint_trajectory_controller/joint_trajectory',
+            10
+        )
+
+        # Timer for periodic walking updates
+        self.timer = self.create_timer(0.1, self.step_callback)
+
+        # Walking state variables
+        self.step_phase = 0.0
+
+    def step_callback(self):
+        """Generate walking motion based on current phase"""
+        trajectory_msg = JointTrajectory()
+        trajectory_msg.joint_names = [
+            'left_hip_pitch', 'left_knee', 'left_ankle',
+            'right_hip_pitch', 'right_knee', 'right_ankle'
+        ]
+
+        # Create trajectory point with walking gait
+        point = JointTrajectoryPoint()
+        point.positions = self.calculate_step_positions()
+        point.time_from_start = Duration(sec=0, nanosec=100000000)  # 0.1 seconds
+
+        trajectory_msg.points.append(point)
+        self.traj_pub.publish(trajectory_msg)
+
+        # Advance step phase
+        self.step_phase += 0.1
+        if self.step_phase >= 2 * 3.14159:  # 2π radians
+            self.step_phase = 0.0
+
+    def calculate_step_positions(self):
+        """Calculate joint angles for walking motion"""
+        # Simplified walking gait calculation
+        left_hip = 0.2 * math.sin(self.step_phase)
+        right_hip = 0.2 * math.sin(self.step_phase + 3.14159)  # Opposite phase
+        # Add more complex gait calculations here
+        return [left_hip, 0.0, 0.0, right_hip, 0.0, 0.0]
+
+def main(args=None):
+    rclpy.init(args=args)
+    controller = WalkingController()
+
+    try:
+        rclpy.spin(controller)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        controller.destroy_node()
+        rclpy.shutdown()
+```
+
+## Challenges and Considerations
+
+While ROS 2 provides powerful infrastructure, there are important challenges to address:
+
+- **Real-time Performance**: Humanoid robots often require precise timing for stability and safety
+- **Latency**: Communication delays between nodes can affect robot responsiveness
+- **Safety**: Proper safety mechanisms must be implemented to prevent harm to humans and equipment
+- **Complexity**: Managing many interconnected nodes can become complex as systems scale
+
+## Looking Ahead
+
+ROS 2 serves as the foundation for all other modules in this course. Understanding how nodes communicate through topics and services is crucial for:
+- Connecting simulation environments to real hardware (Module 2)
+- Integrating AI perception systems (Module 3)
+- Implementing voice and language interfaces (Module 4)
+
+## Hands-On Exercise
+
+Create a ROS 2 package that implements a simple humanoid robot controller. Your package should include:
+1. A publisher that sends joint angle commands
+2. A subscriber that receives sensor data
+3. A service that responds to movement requests
+4. Launch files to start your nodes together
+
+## Discussion Questions
+
+1. How does the publish-subscribe model of ROS 2 compare to other communication patterns you've seen in software development?
+2. What safety considerations would you need to implement when controlling a real humanoid robot with ROS 2?
+3. How might you handle the complexity of managing dozens of nodes in a full humanoid robot system?
